@@ -45,10 +45,16 @@ fi
 # wake the camera up and ensure the live streaming mode
 case "${camctl}" in
   'ricoh')
-    ricoh wake && ricoh mode live
+    if ! ricoh wake || ! ricoh mode live; then
+      printf "Failed to wake the camera or set to live mode.\n" 1>&2
+      exit 1
+    fi
     ;;
   'ptpcam')
-    ptpcam --set-property=0xd80e 0 && ptpcam --set-property=0x5013 --val=0x8005
+    if ! ptpcam --set-property=0xd80e 0 || ! ptpcam --set-property=0x5013 --val=0x8005; then
+      printf "Failed to configure ptpcam.\n" 1>&2
+      exit 1
+    fi
     ;;
   *)
     exit 1
@@ -56,7 +62,10 @@ case "${camctl}" in
 esac
 
 # put it in background to avoid blocking
-gst_loopback --format 2K &
+if ! gst_loopback --format 2K &; then
+  printf "Failed to start gst_loopback.\n" 1>&2
+  exit 1
+fi
 
 # launch cv_camera_node
 roslaunch ricoh_theta_ros start.launch device_id:=2

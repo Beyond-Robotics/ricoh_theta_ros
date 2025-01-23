@@ -41,6 +41,24 @@ Make sure the following ROS packages have been installed:
 - `sensor_msgs`
 - `cv_camera`
 
+### Docker Installation
+
+To run the project using Docker, you can use the provided `docker-compose.yaml` file. Make sure you have Docker and Docker Compose installed on your system.
+
+1. Build and run the Docker container:
+
+   ```sh
+   docker-compose up --build
+   ```
+
+2. This command will start the ROS master and the RICOH THETA ROS node. You can access the camera through the Docker container.
+
+3. To stop the containers, use:
+
+   ```sh
+   docker-compose down
+   ```
+
 Navigate into your ROS workspace directory and run:
 
 ```sh
@@ -78,7 +96,7 @@ The `start.sh` script performs:
 - Running a launch file that starts `cv_camera` node and remaps the `image_raw`,
   `camera_info` and `set_camera_info` topics from `cv_camera` namespace to
   `360cam` namespace.
-- Setting up resolution. RICOTH THETA V and Z1 support live streaming in either 4K
+- Setting up resolution. RICOH THETA V and Z1 support live streaming in either 4K
   (3840x1920) or 2K (1920x960) resolution, `start.sh` sets resolution to 2K to
   reduce latency.
 

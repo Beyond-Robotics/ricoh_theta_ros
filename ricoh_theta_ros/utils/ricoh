@@ -75,14 +75,23 @@ EOF
 _get_prop()
 {
   local val
-  val="$(${_cmd} -v --show-property=$1 2>/dev/null | \
+  val="$(${_cmd} -v --show-property="$1" 2>/dev/null | \
     awk '/Current value:/{ print $3 }')"
+  
+  if [ -z "$val" ]; then
+    printf "Failed to get property $1\n" 1>&2
+    exit 1
+  fi
+  
   echo "${val}"
 }
 
 _set_prop()
 {
-  ${_cmd} --set-property="$1" --val="$2"
+  if ! ${_cmd} --set-property="$1" --val="$2"; then
+    printf "Failed to set property $1 to value $2\n" 1>&2
+    exit 1
+  fi
 }
 
 _show_sleep()
@@ -165,12 +174,12 @@ _set_mode()
     video)
       val=0x8002;;
     *)
-      printf "$1: unspported mode"
+      printf "$1: unsupported mode\n" 1>&2
       exit 1
       ;;
   esac
 
-  _set_prop '0x5013', "${val}"
+  _set_prop '0x5013' "$val"
 }
 
 _sleep()
@@ -212,11 +221,16 @@ _device_info()
 main()
 {
   if ! command -v "${_cmd}" >/dev/null 2>&1; then
-    printf "${_cmd} is not available\n"
+    printf "${_cmd} is not available\n" 1>&2
     exit 1
   fi
 
   args=$(getopt -o 'hv' -l 'help,verbose' -- "$@")
+  if [ $? -ne 0 ]; then
+    printf "Invalid options provided\n" 1>&2
+    _usage
+    exit 1
+  fi
   eval set -- "${args}"
 
   while true; do
